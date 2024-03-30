@@ -16,6 +16,7 @@ client = InfluxDBClient(host, port, user, password, dbname)
 
 ###############Variables globales:########################
 maxPower = random.randint(20, 70) # Potencia maxima del cargador (kWh).
+##########################################################
 
 # Genera la matricula del vehiculo que entra a cargar
 def generateVehicleID():
@@ -54,6 +55,15 @@ def generateData(car, bateryLevel, bateryCapacity):
     ]
     return data
     
+# Calcula el nuevo porcentaje de bateria segun la potencia del cargador (maxPower)
+def calculateBateryIncrement(bl, bc):
+    velocity = maxPower*3600 #kW por segundo
+    actualKW = bc * (bl/100)
+    incremented = actualKW + velocity
+    if (incremented >= bc):
+        return 100
+    else:
+        return (incremented * 100) / bc # Porcentaje actual
     
 def main():
     # Hay un coche cargando?
@@ -74,6 +84,15 @@ def main():
         else:
             data = generateData(vehicleID, bateryLevel, bateryCapacity)
             #Actualizar los datos del coche y eliminarlo en caso de que llegue al 100%
+            if (bateryLevel >= 100):
+                isThereAcar = False
+                vehicleID = None 
+                bateryLevel = -1 
+                bateryCapacity = None
+                #No se actualiza el siguiente estado de isThereAcar aqui para dejar que haya al menos una iteracion sin coche
+            else:
+                bateryLevel = calculateBateryIncrement(bateryLevel, bateryCapacity)
+            
         
         # Escribir los datos en InfluxDB
         client.write_points(data)
@@ -81,6 +100,7 @@ def main():
         # Esperar un segundo antes de generar el siguiente dato
         time.sleep(1)
 
-
+if __name__ == "__main__":
+    main()
 
         
