@@ -1,4 +1,4 @@
-from faker import Faker
+#from faker import Faker
 import random
 import time
 import string
@@ -76,7 +76,7 @@ def main():
         if (isThereAcar == False):
             data = generateData(None, bateryLevel, bateryCapacity)
             isThereAcar = random.choice([True, False]) # Entra un coche para la siguiente iteracion?
-            if(isThereAcar == True):
+            if(isThereAcar == True): #Generamos el vehiculo para la siguiente iteracion
                 vehicleID = generateVehicleID
                 bateryLevel = random.uniform(0,99) 
                 bateryCapacity = random.randint(40,100)
