@@ -76,7 +76,9 @@ def generateData(car, bateryLevel, bateryCapacity):
     return data
     
 """
-    Calcula el nuevo porcentaje de bateria segun la potencia del cargador (maxPower)
+    Calcula el nuevo porcentaje de bateria segun la potencia del cargador (maxPower). Calcula la velocidad de carga por segundo
+    del cargador usando la potencia maxima de este, la carga actual de la bateria en kWh segun su porcentaje y realiza los calculos 
+    para sumar los kWh y devolver el porcentaje.
     inputs: 
         bl : float (bateryLevel)
         bc : float (bateryCapacity)
@@ -84,10 +86,9 @@ def generateData(car, bateryLevel, bateryCapacity):
         Porcentaje actual de bateria <= 100.
 """
 def calculateBateryIncrement(bl, bc):
-    velocity = maxPower*3600 #kW por segundo
-    actualKW = bc * (bl/100)
-    #TODO ARREGLAR INCREMENTED
-    incremented = actualKW + velocity #ActualKW está en horas y le entra por segundo asi que está mal.
+    velocity = maxPower/3600 #kW por segundo
+    actualKW = bc * (bl/100) #kWh almacenados en la bateria actualmente
+    incremented = actualKW + velocity 
     if (incremented >= bc):
         return float(100)
     else:
