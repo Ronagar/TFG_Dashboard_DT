@@ -36,6 +36,7 @@ write_api = client.write_api(write_options=SYNCHRONOUS)
 
 ###############Variables globales:########################
 maxPower = random.randint(20, 70) 
+energy = 0.0
 ##########################################################
 
 """
@@ -56,11 +57,7 @@ def generateVehicleID():
     output:
         data : Charger
 """
-def generateData(car, bateryLevel, bateryCapacity):
-    energy = 0.0
-    if (car != None): 
-        energy = float(bateryCapacity - (bateryCapacity * (bateryLevel/100)))
- 
+def generateData(car, bateryLevel, bateryCapacity): 
     price = round(random.uniform (0.05, 0.30),2)
     timestamp = int(time.time()) * 1000000000  # Convertir a nanosegundos
 
@@ -96,6 +93,7 @@ def calculateBateryIncrement(bl, bc):
     
 
 def main():
+    global energy
     # Hay un coche cargando?
     isThereAcar = False
     vehicleID = "-" 
@@ -112,6 +110,7 @@ def main():
                 vehicleID = generateVehicleID()
                 bateryLevel = float(random.randint(0,99)) 
                 bateryCapacity = random.randint(40,100)
+                energy = float(bateryCapacity - (bateryCapacity * (bateryLevel/100)))
 
         else:
             data = generateData(vehicleID, bateryLevel, bateryCapacity)
@@ -121,6 +120,7 @@ def main():
                 vehicleID = "-" 
                 bateryLevel = -1.0 
                 bateryCapacity = -1
+                energy = 0.0
                 #No se actualiza el siguiente estado de isThereAcar aqui para dejar que haya al menos una iteracion sin coche
             else:
                 bateryLevel = calculateBateryIncrement(bateryLevel, float(bateryCapacity))
