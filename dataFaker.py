@@ -1,4 +1,3 @@
-#from faker import Faker
 import random
 import time
 import string
@@ -22,7 +21,37 @@ class Charger:
     maxPower: int           # Potencia maxima del cargador (kWh).
     price: float            # Precio por kWh. TODO Estudiar si merece la pena tratar de que los precios sean reales
     timestamp: int          # Marca temporal de la medicion (ns)
+
+"""
+    Clase para crear y manejar los datos de los vehiculo.
+    Genera un vehiculo con una matricula aleatoria, un nivel y capacidad de bateria aleatorio y la energia que va a gastar en relacion a la bateria. 
+    Depende de un booleano (enter) para inicializar el vehiculo con datos (hay un vehiculo) o sin ellos (no hay un vehiculo). 
+"""   
+class Car:
+    vehicleID: str
+    bateryLevel: float
+    bateryCapacity: int
+    energy: float
+    """
+        Genera la matricula del vehiculo que entra a cargar
+    """
+    def generateVehicleID(self):
+        letras = ""
+        for _ in range(3):
+            letras += random.choice(string.ascii_uppercase)
+        return str(random.randint(1000, 9999)) + letras
     
+    def __init__(self, enter):
+        if (enter):
+            self.vehicleID = self.generateVehicleID()
+            self.bateryLevel = float(random.randint(0,99)) 
+            self.bateryCapacity = random.randint(40,100)
+            self.energy = float(self.bateryCapacity - (self.bateryCapacity * (self.bateryLevel/100)))
+        else:
+            self.vehicleID = "noCar"
+            self.bateryLevel = -1.0
+            self.bateryCapacity = -1
+            self.energy = 0.0
 
 # Configuración de InfluxDB
 myToken = "myToken"
@@ -36,37 +65,25 @@ write_api = client.write_api(write_options=SYNCHRONOUS)
 
 ###############Variables globales:########################
 maxPower = random.randint(20, 70) 
-energy = 0.0
 ##########################################################
-
-"""
-    Genera la matricula del vehiculo que entra a cargar
-"""
-def generateVehicleID():
-    letras = ""
-    for _ in range(3):
-        letras += random.choice(string.ascii_uppercase)
-    return str(random.randint(1000, 9999)) + letras
 
 """
     Genera los datos que se enviaran a la base de datos
     inputs: 
-        car : str (vehicleID)
-        bateryLevel : float
-        bateryCapacity : int
+        car : Car 
+        chargerID : str
     output:
         data : Charger
 """
-def generateData(car, bateryLevel, bateryCapacity): 
-    price = round(random.uniform (0.05, 0.30),2)
+def generateData(car, chargerID, price): 
     timestamp = int(time.time()) * 1000000000  # Convertir a nanosegundos
 
     # Estructura del dato para InfluxDB
-    data = Charger(name = "Charger",
+    data = Charger(name = chargerID,
                    location ="stationA", 
-                   vehicleID = car, 
-                   energy = energy, 
-                   bateryLevel = bateryLevel, 
+                   vehicleID = car.vehicleID, 
+                   energy = car.energy, 
+                   bateryLevel = car.bateryLevel, 
                    maxPower = maxPower, 
                    price = price, 
                    timestamp = timestamp)
@@ -91,40 +108,39 @@ def calculateBateryIncrement(bl, bc):
     else:
         return (incremented * 100) / bc # Porcentaje actual
     
-
-def main():
-    global energy
-    # Hay un coche cargando?
-    isThereAcar = False
-    vehicleID = "-" 
-    bateryLevel = -1.0 
-    bateryCapacity = -1 # Capacidad total de la bateria del vehiculo en kWh
-
-    while True:
-        if (isThereAcar == False):
-            data = generateData(None, bateryLevel, bateryCapacity)
-
+"""
+    Calcula el estado del coche en la siguiente iteracion. Si el coche esta cargando, se comprueba si ha llegado al 100%. En caso de estar al 100%, se elimina el coche, 
+    si no, se actualiza el porcentaje de bateria.
+    input:
+        car : Car (estado actual)
+    output:
+        car : Car (estado siguiente)
+"""    
+def calculateCarState(car):
+    # Comprobar si hay un coche cargando     
+        if (car.vehicleID == "noCar"): #No hay coche       
             # Preparar siguiente iteracion
             isThereAcar = random.choice([True, False]) # Entra un coche para la siguiente iteracion?
             if(isThereAcar == True): #Generamos el vehiculo para la siguiente iteracion
-                vehicleID = generateVehicleID()
-                bateryLevel = float(random.randint(0,99)) 
-                bateryCapacity = random.randint(40,100)
-                energy = float(bateryCapacity - (bateryCapacity * (bateryLevel/100)))
-
+                car = Car(True)
         else:
-            data = generateData(vehicleID, bateryLevel, bateryCapacity)
             #Actualizar los datos del coche y eliminarlo en caso de que llegue al 100%
-            if (bateryLevel >= 100):
-                isThereAcar = False
-                vehicleID = "-" 
-                bateryLevel = -1.0 
-                bateryCapacity = -1
-                energy = 0.0
+            if (car.bateryLevel >= 100):
+                car = Car(False)
                 #No se actualiza el siguiente estado de isThereAcar aqui para dejar que haya al menos una iteracion sin coche
             else:
-                bateryLevel = calculateBateryIncrement(bateryLevel, float(bateryCapacity))
-            
+                car.bateryLevel = calculateBateryIncrement(car.bateryLevel, float(car.bateryCapacity))
+        return car
+
+def main():
+    # Inicializar los coches nulos
+    car1 = Car(False)
+    car2 = Car(False)
+
+    while True:
+        price = round(random.uniform (0.05, 0.30),2)
+        data = generateData(car1, "Charger1", price) #generateData(car1)
+        data2 = generateData(car2, "Charger2", price) #generateData(car2)
         
         # Escribir los datos en InfluxDB
         write_api.write(bucket = bucket,
@@ -133,6 +149,16 @@ def main():
                         record_time_key = "timestamp",
                         record_tag_keys=["location"],
                         record_field_keys=["vehicleID", "energy", "bateryLevel", "maxPower", "price"])
+        write_api.write(bucket = bucket,
+                        record = data2,
+                        record_measurement_key="name",
+                        record_time_key = "timestamp",
+                        record_tag_keys=["location"],
+                        record_field_keys=["vehicleID", "energy", "bateryLevel", "maxPower", "price"])
+        
+        #Actualizar el estado del coche
+        car1 = calculateCarState(car1)
+        car2 = calculateCarState(car2)
 
         # Esperar un segundo antes de generar el siguiente dato
         time.sleep(1)
@@ -140,4 +166,3 @@ def main():
 if __name__ == "__main__":
     main()
 
-        
