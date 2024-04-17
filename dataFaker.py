@@ -72,6 +72,7 @@ maxPower = random.randint(20, 70)
     inputs: 
         car : Car 
         chargerID : str
+        price : float
     output:
         data : Charger
 """
@@ -145,15 +146,15 @@ def main():
         # Escribir los datos en InfluxDB
         write_api.write(bucket = bucket,
                         record = data,
-                        record_measurement_key="name",
+                        record_measurement_key="location",
                         record_time_key = "timestamp",
-                        record_tag_keys=["location"],
+                        record_tag_keys=["name"],
                         record_field_keys=["vehicleID", "energy", "bateryLevel", "maxPower", "price"])
         write_api.write(bucket = bucket,
                         record = data2,
-                        record_measurement_key="name",
+                        record_measurement_key="location",
                         record_time_key = "timestamp",
-                        record_tag_keys=["location"],
+                        record_tag_keys=["name"],
                         record_field_keys=["vehicleID", "energy", "bateryLevel", "maxPower", "price"])
         
         #Actualizar el estado del coche
