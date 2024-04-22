@@ -9,14 +9,14 @@ from influxdb_client.client.write_api import SYNCHRONOUS
     Clase para crear los datos a enviar a InfluxDB.
     Measure Key: name
     Tags: location
-    Fields: vehicleID, energy, bateryLevel, maxPower, price
+    Fields: vehicleID, energyConsumed, bateryLevel, maxPower, price
 """
 @dataclass
 class Charger:
     name: str               # Nombre/ID del cargador
     location: str           # Ubicacion del cargador
     vehicleID: str          # Matricula del vehiculo usuario
-    energy: float           # Energia consumida en la carga total en kWh. En la version inicial, todos los coches se quedarán hasta completar la carga. Deberían poder desconectarse antes de completar la carga
+    energyConsumed: float   # Energia consumida en la carga total en kWh. En la version inicial, todos los coches se quedarán hasta completar la carga. Deberían poder desconectarse antes de completar la carga
     bateryLevel: float      # Nivel de bateria del vehiculo (%)
     maxPower: int           # Potencia maxima del cargador (kWh).
     price: float            # Precio por kWh. TODO Estudiar si merece la pena tratar de que los precios sean reales
@@ -31,7 +31,7 @@ class Car:
     vehicleID: str
     bateryLevel: float
     bateryCapacity: int
-    energy: float
+    energyConsumed: float
     """
         Genera la matricula del vehiculo que entra a cargar
     """
@@ -46,12 +46,12 @@ class Car:
             self.vehicleID = self.generateVehicleID()
             self.bateryLevel = float(random.randint(0,99)) 
             self.bateryCapacity = random.randint(40,100)
-            self.energy = float(self.bateryCapacity - (self.bateryCapacity * (self.bateryLevel/100)))
+            self.energyConsumed = float(self.bateryCapacity - (self.bateryCapacity * (self.bateryLevel/100)))
         else:
             self.vehicleID = "noCar"
             self.bateryLevel = -1.0
             self.bateryCapacity = -1
-            self.energy = 0.0
+            self.energyConsumed = 0.0
 
 # Configuración de InfluxDB
 myToken = "myToken"
@@ -83,7 +83,7 @@ def generateData(car, chargerID, price):
     data = Charger(name = chargerID,
                    location ="stationA", 
                    vehicleID = car.vehicleID, 
-                   energy = car.energy, 
+                   energyConsumed = car.energyConsumed, 
                    bateryLevel = car.bateryLevel, 
                    maxPower = maxPower, 
                    price = price, 
@@ -149,13 +149,13 @@ def main():
                         record_measurement_key="location",
                         record_time_key = "timestamp",
                         record_tag_keys=["name"],
-                        record_field_keys=["vehicleID", "energy", "bateryLevel", "maxPower", "price"])
+                        record_field_keys=["vehicleID", "energyConsumed", "bateryLevel", "maxPower", "price"])
         write_api.write(bucket = bucket,
                         record = data2,
                         record_measurement_key="location",
                         record_time_key = "timestamp",
                         record_tag_keys=["name"],
-                        record_field_keys=["vehicleID", "energy", "bateryLevel", "maxPower", "price"])
+                        record_field_keys=["vehicleID", "energyConsumed", "bateryLevel", "maxPower", "price"])
         
         #Actualizar el estado del coche
         car1 = calculateCarState(car1)
