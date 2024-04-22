@@ -46,7 +46,7 @@ class Car:
             self.vehicleID = self.generateVehicleID()
             self.bateryLevel = float(random.randint(0,99)) 
             self.bateryCapacity = random.randint(40,100)
-            self.energyConsumed = float(self.bateryCapacity - (self.bateryCapacity * (self.bateryLevel/100)))
+            self.energyConsumed = 0.0
         else:
             self.vehicleID = None
             self.bateryLevel = None
@@ -93,21 +93,22 @@ def generateData(car, chargerID, price):
 """
     Calcula el nuevo porcentaje de bateria segun la potencia del cargador (maxPower). Calcula la velocidad de carga por segundo
     del cargador usando la potencia maxima de este, la carga actual de la bateria en kWh segun su porcentaje y realiza los calculos 
-    para sumar los kWh y devolver el porcentaje.
+    para sumar los kWh y devolver el coche con el nuevo porcentaje. Tambien actualiza la energia consumida por el coche.
     inputs: 
-        bl : float (bateryLevel)
-        bc : float (bateryCapacity)
+        car : Car
     output:
         Porcentaje actual de bateria <= 100.
 """
-def calculateBateryIncrement(bl, bc):
+def calculateBateryIncrement(car):
     velocity = maxPower/3600 #kW por segundo
-    actualKW = bc * (bl/100) #kWh almacenados en la bateria actualmente
+    actualKW = car.bateryCapacity * (car.bateryLevel/100) #kWh almacenados en la bateria actualmente
     incremented = actualKW + velocity 
-    if (incremented >= bc):
-        return float(100)
+    car.energyConsumed += velocity
+    if (incremented >= car.bateryCapacity):
+        car.bateryLevel = float(100)
     else:
-        return (incremented * 100) / bc # Porcentaje actual
+        car.bateryLevel = (incremented * 100) / car.bateryCapacity # Porcentaje actual
+    return car
     
 """
     Calcula el estado del coche en la siguiente iteracion. Si el coche esta cargando, se comprueba si ha llegado al 100%. En caso de estar al 100%, se elimina el coche, 
@@ -130,7 +131,7 @@ def calculateCarState(car):
                 car = Car(False)
                 #No se actualiza el siguiente estado de isThereAcar aqui para dejar que haya al menos una iteracion sin coche
             else:
-                car.bateryLevel = calculateBateryIncrement(car.bateryLevel, float(car.bateryCapacity))
+                car = calculateBateryIncrement(car)
         return car
 
 def main():
