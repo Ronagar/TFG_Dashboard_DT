@@ -48,10 +48,10 @@ class Car:
             self.bateryCapacity = random.randint(40,100)
             self.energyConsumed = float(self.bateryCapacity - (self.bateryCapacity * (self.bateryLevel/100)))
         else:
-            self.vehicleID = "noCar"
-            self.bateryLevel = -1.0
-            self.bateryCapacity = -1
-            self.energyConsumed = 0.0
+            self.vehicleID = None
+            self.bateryLevel = None
+            self.bateryCapacity = None
+            self.energyConsumed = None
 
 # Configuración de InfluxDB
 myToken = "myToken"
@@ -119,7 +119,7 @@ def calculateBateryIncrement(bl, bc):
 """    
 def calculateCarState(car):
     # Comprobar si hay un coche cargando     
-        if (car.vehicleID == "noCar"): #No hay coche       
+        if (car.vehicleID == None): #No hay coche       
             # Preparar siguiente iteracion
             isThereAcar = random.choice([True, False]) # Entra un coche para la siguiente iteracion?
             if(isThereAcar == True): #Generamos el vehiculo para la siguiente iteracion
