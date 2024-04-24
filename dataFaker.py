@@ -20,11 +20,12 @@ class Charger:
     bateryLevel: float      # Nivel de bateria del vehiculo (%)
     maxPower: int           # Potencia maxima del cargador (kWh).
     price: float            # Precio por kWh. TODO Estudiar si merece la pena tratar de que los precios sean reales
+    energyBill: float       # Coste total de la carga
     timestamp: int          # Marca temporal de la medicion (ns)
 
 """
     Clase para crear y manejar los datos de los vehiculo.
-    Genera un vehiculo con una matricula aleatoria, un nivel y capacidad de bateria aleatorio y la energia que va a gastar en relacion a la bateria. 
+    Genera un vehiculo con una matricula aleatoria, un nivel y capacidad de bateria aleatorio, la energia que gasta en relacion a la bateria y el coste de la carga. 
     Depende de un booleano (enter) para inicializar el vehiculo con datos (hay un vehiculo) o sin ellos (no hay un vehiculo). 
 """   
 class Car:
@@ -32,6 +33,7 @@ class Car:
     bateryLevel: float
     bateryCapacity: int
     energyConsumed: float
+    energyBill: float
     """
         Genera la matricula del vehiculo que entra a cargar
     """
@@ -47,11 +49,13 @@ class Car:
             self.bateryLevel = float(random.randint(0,99)) 
             self.bateryCapacity = random.randint(40,100)
             self.energyConsumed = 0.0
+            self.energyBill = 0.0
         else:
             self.vehicleID = None
             self.bateryLevel = None
             self.bateryCapacity = None
             self.energyConsumed = None
+            self.energyBill = None
 
 # Configuración de InfluxDB
 myToken = "myToken"
@@ -86,24 +90,28 @@ def generateData(car, chargerID, price):
                    energyConsumed = car.energyConsumed, 
                    bateryLevel = car.bateryLevel, 
                    maxPower = maxPower, 
-                   price = price, 
+                   price = price,
+                   energyBill = car.energyBill,
                    timestamp = timestamp)
     return data
     
 """
     Calcula el nuevo porcentaje de bateria segun la potencia del cargador (maxPower). Calcula la velocidad de carga por segundo
     del cargador usando la potencia maxima de este, la carga actual de la bateria en kWh segun su porcentaje y realiza los calculos 
-    para sumar los kWh y devolver el coche con el nuevo porcentaje. Tambien actualiza la energia consumida por el coche.
+    para sumar los kWh y devolver el coche con el nuevo porcentaje. Tambien actualiza la energia consumida por el coche y el coste de la carga.
     inputs: 
         car : Car
+        price : float
     output:
-        Porcentaje actual de bateria <= 100.
+        Car con el nuevo Porcentaje actual de bateria <= 100 y consumos.
 """
-def calculateBateryIncrement(car):
+def calculateBateryIncrement(car, price):
     velocity = maxPower/3600 #kW por segundo
+    pricePerSecond = price / 3600 #Precio por segundo
     actualKW = car.bateryCapacity * (car.bateryLevel/100) #kWh almacenados en la bateria actualmente
     incremented = actualKW + velocity 
     car.energyConsumed += velocity
+    car.energyBill += pricePerSecond * velocity
     if (incremented >= car.bateryCapacity):
         car.bateryLevel = float(100)
     else:
@@ -115,10 +123,11 @@ def calculateBateryIncrement(car):
     si no, se actualiza el porcentaje de bateria.
     input:
         car : Car (estado actual)
+        price : float (precio del kWh)
     output:
         car : Car (estado siguiente)
 """    
-def calculateCarState(car):
+def calculateCarState(car, price):
     # Comprobar si hay un coche cargando     
         if (car.vehicleID == None): #No hay coche       
             # Preparar siguiente iteracion
@@ -131,7 +140,7 @@ def calculateCarState(car):
                 car = Car(False)
                 #No se actualiza el siguiente estado de isThereAcar aqui para dejar que haya al menos una iteracion sin coche
             else:
-                car = calculateBateryIncrement(car)
+                car = calculateBateryIncrement(car, price)
         return car
 
 def main():
@@ -150,17 +159,17 @@ def main():
                         record_measurement_key="location",
                         record_time_key = "timestamp",
                         record_tag_keys=["name"],
-                        record_field_keys=["vehicleID", "energyConsumed", "bateryLevel", "maxPower", "price"])
+                        record_field_keys=["vehicleID", "energyConsumed", "bateryLevel", "maxPower", "price", "energyBill"])
         write_api.write(bucket = bucket,
                         record = data2,
                         record_measurement_key="location",
                         record_time_key = "timestamp",
                         record_tag_keys=["name"],
-                        record_field_keys=["vehicleID", "energyConsumed", "bateryLevel", "maxPower", "price"])
+                        record_field_keys=["vehicleID", "energyConsumed", "bateryLevel", "maxPower", "price", "energyBill"])
         
         #Actualizar el estado del coche
-        car1 = calculateCarState(car1)
-        car2 = calculateCarState(car2)
+        car1 = calculateCarState(car1, price)
+        car2 = calculateCarState(car2, price)
 
         # Esperar un segundo antes de generar el siguiente dato
         time.sleep(1)
