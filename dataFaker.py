@@ -107,11 +107,10 @@ def generateData(car, chargerID, price):
 """
 def calculateBateryIncrement(car, price):
     velocity = maxPower/3600 #kW por segundo
-    pricePerSecond = price / 3600 #Precio por segundo
     actualKW = car.bateryCapacity * (car.bateryLevel/100) #kWh almacenados en la bateria actualmente
     incremented = actualKW + velocity 
     car.energyConsumed += velocity
-    car.energyBill += pricePerSecond * velocity
+    car.energyBill += price * velocity
     if (incremented >= car.bateryCapacity):
         car.bateryLevel = float(100)
     else:
@@ -149,7 +148,7 @@ def main():
     car2 = Car(False)
 
     while True:
-        price = round(random.uniform (0.05, 0.30),2)
+        price = round(random.uniform (0.15, 0.75),2)
         data = generateData(car1, "Charger1", price) #generateData(car1)
         data2 = generateData(car2, "Charger2", price) #generateData(car2)
         
