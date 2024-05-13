@@ -185,6 +185,16 @@ def calculateCarState(car, price):
             car = calculateBateryIncrement(car, price)
     return car
 
+"""
+    Cuenta las plazas libres en la cola de espera
+"""    
+def countFreeQueueSpaces():
+    count = 0
+    for c in waitingQueue:
+        if c.vehicleID == None:
+            count += 1
+    return count
+
 def main():
     waitingQueue 
     waitingQueue[0] = Car(True) #Añadir un coche a la cola
@@ -193,10 +203,8 @@ def main():
     # Inicializar los coches nulos para los cargadores
     car1 = Car(False)
     car2 = Car(False)
-    # Crear coche auxiliar para la cola
-    carAux = Car(False)
 
-    nextCar = random.randint(20, 30) #Tiempo en minutos que tarda el siguiente coche en entrar
+    nextCar = random.randint(5, 15) #Tiempo en minutos que tarda el siguiente coche en entrar
     nextCounter = 0 #Contador para saber cuando entra el siguiente coche
 
     while True:
@@ -229,7 +237,8 @@ def main():
         #Actualizar el estado del coche
         car1 = calculateCarState(car1, price)
         car2 = calculateCarState(car2, price)
-
+       
+        
         #Actualizar el estado de la cola
         nextCounter = nextCounter + 1
         #if(nextCounter == nextCar*60 and len(queue) < maxCarsInQueue): #Comprobar si el ultimo elemento es matricula none
@@ -237,9 +246,9 @@ def main():
             if(waitingQueue[maxCarsInQueue-1].vehicleID == None): #Comprobar si hay una posición vacia en la cola
                 #queue.append(Car(True))
                 #Añadir un coche a la cola en la primera posicion vacia
-                waitingQueue[maxCarsInQueue - waitingQueue.count(carAux)] = Car(True)
+                waitingQueue[maxCarsInQueue - countFreeQueueSpaces()] = Car(True)
             #Nuevo tiempo de llegada para el siguiente coche
-            nextCar = random.randint(20, 30)
+            nextCar = random.randint(5, 15)
             nextCounter = 0
 
         # Esperar un segundo antes de generar el siguiente dato
