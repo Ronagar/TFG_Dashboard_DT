@@ -38,6 +38,11 @@ class dataQueue:
     vehicle3: str           # Matricula del vehiculo usuario 3
     vehicle4: str           # Matricula del vehiculo usuario 4
     vehicle5: str           # Matricula del vehiculo usuario 5
+    waitingTime1: int       # Tiempo de espera del vehiculo 1
+    watingTime2: int        # Tiempo de espera del vehiculo 2
+    waitingTime3: int       # Tiempo de espera del vehiculo 3
+    waitingTime4: int       # Tiempo de espera del vehiculo 4
+    waitingTime5: int       # Tiempo de espera del vehiculo 5
     timestamp: int          # Marca temporal de la medicion (ns)
 
 """
@@ -88,6 +93,7 @@ write_api = client.write_api(write_options=SYNCHRONOUS)
 maxPower = random.randint(20, 70) 
 maxCarsInQueue = 5
 waitingQueue = deque([Car(False) for _ in range(maxCarsInQueue)], maxCarsInQueue) #Cola de espera de coches
+timeCounter = deque(maxlen=maxCarsInQueue) #Contador de tiempo para cada coche en la cola en segundos
 ##########################################################
 
 """
@@ -131,6 +137,11 @@ def generateDataQueue():
                     vehicle3 = waitingQueue[2].vehicleID,
                     vehicle4 = waitingQueue[3].vehicleID,
                     vehicle5 = waitingQueue[4].vehicleID,
+                    waitingTime1 = timeCounter[0],
+                    watingTime2 = timeCounter[1],
+                    waitingTime3 = timeCounter[2],
+                    waitingTime4 = timeCounter[3],
+                    waitingTime5 = timeCounter[4],
                     timestamp = timestamp)
     return data
     
@@ -176,6 +187,8 @@ def calculateCarState(car, price):
         if(waitingQueue[0].vehicleID != None): #Si hay coches en la cola, entra el primero a cargar
             car = waitingQueue.popleft()
             waitingQueue.append(Car(False))
+            timeCounter.popleft()
+            timeCounter.append(0)
     else:
         #Actualizar los datos del coche y eliminarlo en caso de que llegue al 100%
         if (car.bateryLevel >= 100):
@@ -232,7 +245,7 @@ def main():
                         record_measurement_key="location",
                         record_time_key = "timestamp",
                         record_tag_keys=[],
-                        record_field_keys=["vehicle1", "vehicle2", "vehicle3", "vehicle4", "vehicle5"])
+                        record_field_keys=["vehicle1", "vehicle2", "vehicle3", "vehicle4", "vehicle5", "waitingTime1", "watingTime2", "waitingTime3", "waitingTime4", "waitingTime5"])
         
         #Actualizar el estado del coche
         car1 = calculateCarState(car1, price)
@@ -240,16 +253,21 @@ def main():
        
         
         #Actualizar el estado de la cola
+        freeSpaces = countFreeQueueSpaces()
         nextCounter = nextCounter + 1
+        for i in range(maxCarsInQueue-freeSpaces):
+            timeCounter[i] += 1
         #if(nextCounter == nextCar*60 and len(queue) < maxCarsInQueue): #Comprobar si el ultimo elemento es matricula none
         if(nextCounter == nextCar*60): #El contador ha llegado al tiempo de llegada
             if(waitingQueue[maxCarsInQueue-1].vehicleID == None): #Comprobar si hay una posición vacia en la cola
                 #queue.append(Car(True))
                 #Añadir un coche a la cola en la primera posicion vacia
-                waitingQueue[maxCarsInQueue - countFreeQueueSpaces()] = Car(True)
+                waitingQueue[maxCarsInQueue - freeSpaces] = Car(True)
+                timeCounter[maxCarsInQueue - freeSpaces] = 0
             #Nuevo tiempo de llegada para el siguiente coche
             nextCar = random.randint(5, 15)
             nextCounter = 0
+
 
         # Esperar un segundo antes de generar el siguiente dato
         time.sleep(1)
