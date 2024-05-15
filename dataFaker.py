@@ -89,12 +89,12 @@ bucket = "myBucket"
 client = influxdb_client.InfluxDBClient(url=url, token=myToken, org=org)
 write_api = client.write_api(write_options=SYNCHRONOUS)
 
-###############Variables globales:########################
+###############Variables globales:#############################################################################
 maxPower = random.randint(20, 70) 
 maxCarsInQueue = 5
 waitingQueue = deque([Car(False) for _ in range(maxCarsInQueue)], maxCarsInQueue) #Cola de espera de coches
-timeCounter = deque(maxlen=maxCarsInQueue) #Contador de tiempo para cada coche en la cola en segundos
-##########################################################
+timeCounter = deque([None for _ in range(maxCarsInQueue)], maxlen=maxCarsInQueue) #Contador de tiempo para cada coche en la cola en segundos
+###############################################################################################################
 
 """
     Genera los datos que se enviaran a la base de datos
@@ -138,7 +138,7 @@ def generateDataQueue():
                     vehicle4 = waitingQueue[3].vehicleID,
                     vehicle5 = waitingQueue[4].vehicleID,
                     waitingTime1 = timeCounter[0],
-                    watingTime2 = timeCounter[1],
+                    waitingTime2 = timeCounter[1],
                     waitingTime3 = timeCounter[2],
                     waitingTime4 = timeCounter[3],
                     waitingTime5 = timeCounter[4],
@@ -178,6 +178,7 @@ def calculateBateryIncrement(car, price):
 """    
 def calculateCarState(car, price):
     waitingQueue
+    timeCounter
     # Comprobar si hay un coche cargando     
     if (car.vehicleID == None): #No hay coche       
         # Preparar siguiente iteracion
@@ -188,7 +189,7 @@ def calculateCarState(car, price):
             car = waitingQueue.popleft()
             waitingQueue.append(Car(False))
             timeCounter.popleft()
-            timeCounter.append(0)
+            timeCounter.append(None)
     else:
         #Actualizar los datos del coche y eliminarlo en caso de que llegue al 100%
         if (car.bateryLevel >= 100):
@@ -210,12 +211,13 @@ def countFreeQueueSpaces():
 
 def main():
     waitingQueue 
-    waitingQueue[0] = Car(True) #Añadir un coche a la cola
-    waitingQueue[1] = Car(True) #Añadir un coche a la cola
+    timeCounter
+    #waitingQueue[0] = Car(True) #Añadir un coche a la cola
+    #waitingQueue[1] = Car(True) #Añadir un coche a la cola
 
-    # Inicializar los coches nulos para los cargadores
-    car1 = Car(False)
-    car2 = Car(False)
+    # Inicializar los coches iniciales para los cargadores
+    car1 = Car(True)
+    car2 = Car(True)
 
     nextCar = random.randint(5, 15) #Tiempo en minutos que tarda el siguiente coche en entrar
     nextCounter = 0 #Contador para saber cuando entra el siguiente coche
@@ -245,7 +247,7 @@ def main():
                         record_measurement_key="location",
                         record_time_key = "timestamp",
                         record_tag_keys=[],
-                        record_field_keys=["vehicle1", "vehicle2", "vehicle3", "vehicle4", "vehicle5", "waitingTime1", "watingTime2", "waitingTime3", "waitingTime4", "waitingTime5"])
+                        record_field_keys=["vehicle1", "vehicle2", "vehicle3", "vehicle4", "vehicle5", "waitingTime1", "waitingTime2", "waitingTime3", "waitingTime4", "waitingTime5"])
         
         #Actualizar el estado del coche
         car1 = calculateCarState(car1, price)
