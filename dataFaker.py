@@ -20,7 +20,7 @@ class Charger:
     energyConsumed: float   # Energia consumida en la carga total en kWh. En la version inicial, todos los coches se quedarán hasta completar la carga. Deberían poder desconectarse antes de completar la carga
     bateryLevel: float      # Nivel de bateria del vehiculo (%)
     maxPower: int           # Potencia maxima del cargador (kWh).
-    price: float            # Precio por kWh. TODO Estudiar si merece la pena tratar de que los precios sean reales
+    price: float            # Precio por kWh. 
     energyBill: float       # Coste total de la carga
     timestamp: int          # Marca temporal de la medicion (ns)
 
@@ -182,9 +182,6 @@ def calculateCarState(car, price):
     # Comprobar si hay un coche cargando     
     if (car.vehicleID == None): #No hay coche       
         # Preparar siguiente iteracion
-        """isThereAcar = random.choice([True, False]) # Entra un coche para la siguiente iteracion?
-        if(isThereAcar == True): #Generamos el vehiculo para la siguiente iteracion
-            car = Car(True)"""
         if(waitingQueue[0].vehicleID != None): #Si hay coches en la cola, entra el primero a cargar
             car = waitingQueue.popleft()
             waitingQueue.append(Car(False))
@@ -212,8 +209,6 @@ def countFreeQueueSpaces():
 def main():
     waitingQueue 
     timeCounter
-    #waitingQueue[0] = Car(True) #Añadir un coche a la cola
-    #waitingQueue[1] = Car(True) #Añadir un coche a la cola
 
     # Inicializar los coches iniciales para los cargadores
     car1 = Car(True)
@@ -259,10 +254,9 @@ def main():
         nextCounter = nextCounter + 1
         for i in range(maxCarsInQueue-freeSpaces):
             timeCounter[i] += 1
-        #if(nextCounter == nextCar*60 and len(queue) < maxCarsInQueue): #Comprobar si el ultimo elemento es matricula none
+            
         if(nextCounter == nextCar*60): #El contador ha llegado al tiempo de llegada
             if(waitingQueue[maxCarsInQueue-1].vehicleID == None): #Comprobar si hay una posición vacia en la cola
-                #queue.append(Car(True))
                 #Añadir un coche a la cola en la primera posicion vacia
                 waitingQueue[maxCarsInQueue - freeSpaces] = Car(True)
                 timeCounter[maxCarsInQueue - freeSpaces] = 0
