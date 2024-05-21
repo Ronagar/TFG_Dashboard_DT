@@ -39,7 +39,7 @@ class dataQueue:
     vehicle4: str           # Matricula del vehiculo usuario 4
     vehicle5: str           # Matricula del vehiculo usuario 5
     waitingTime1: int       # Tiempo de espera del vehiculo 1
-    watingTime2: int        # Tiempo de espera del vehiculo 2
+    waitingTime2: int       # Tiempo de espera del vehiculo 2
     waitingTime3: int       # Tiempo de espera del vehiculo 3
     waitingTime4: int       # Tiempo de espera del vehiculo 4
     waitingTime5: int       # Tiempo de espera del vehiculo 5
@@ -105,8 +105,7 @@ timeCounter = deque([None for _ in range(maxCarsInQueue)], maxlen=maxCarsInQueue
     output:
         data : Charger
 """
-def generateData(car, chargerID, price): 
-    timestamp = int(time.time()) * 1000000000  # Convertir a nanosegundos
+def generateData(car, chargerID, price, timestamp): 
 
     # Estructura del dato para InfluxDB
     data = Charger(name = chargerID,
@@ -127,8 +126,7 @@ def generateData(car, chargerID, price):
     output:
         data : dataQueue
 """
-def generateDataQueue(): 
-    timestamp = int(time.time()) * 1000000000  # Convertir a nanosegundos
+def generateDataQueue(timestamp): 
 
     # Estructura del dato para InfluxDB
     data = dataQueue(location ="stationAQueue", 
@@ -214,14 +212,14 @@ def main():
     car1 = Car(True)
     car2 = Car(True)
 
-    nextCar = random.randint(5, 15) #Tiempo en minutos que tarda el siguiente coche en entrar
-    nextCounter = 0 #Contador para saber cuando entra el siguiente coche
+    nextCar = random.randint(5, 15) * 60 #Tiempo en segundos que tarda el siguiente coche en entrar en la cola
 
     while True:
         price = round(random.uniform (0.15, 0.75),2)
-        data = generateData(car1, "Charger1", price) #generateData(car1)
-        data2 = generateData(car2, "Charger2", price) #generateData(car2)
-        dataQueue = generateDataQueue()
+        timestamp = int(time.time()) * 1000000000  # Convertir a nanosegundos
+        data = generateData(car1, "Charger1", price, timestamp) #generateData(car1)
+        data2 = generateData(car2, "Charger2", price, timestamp) #generateData(car2)
+        dataQueue = generateDataQueue(timestamp)
         
         # Escribir los datos en InfluxDB
         write_api.write(bucket = bucket,
@@ -251,18 +249,17 @@ def main():
         
         #Actualizar el estado de la cola
         freeSpaces = countFreeQueueSpaces()
-        nextCounter = nextCounter + 1
+        nextCar -= 1
         for i in range(maxCarsInQueue-freeSpaces):
             timeCounter[i] += 1
             
-        if(nextCounter == nextCar*60): #El contador ha llegado al tiempo de llegada
+        if(nextCar <= 0): #El contador ha llegado al tiempo de llegada
             if(waitingQueue[maxCarsInQueue-1].vehicleID == None): #Comprobar si hay una posición vacia en la cola
                 #Añadir un coche a la cola en la primera posicion vacia
                 waitingQueue[maxCarsInQueue - freeSpaces] = Car(True)
                 timeCounter[maxCarsInQueue - freeSpaces] = 0
             #Nuevo tiempo de llegada para el siguiente coche
-            nextCar = random.randint(5, 15)
-            nextCounter = 0
+            nextCar = random.randint(5, 15) * 60
 
 
         # Esperar un segundo antes de generar el siguiente dato
