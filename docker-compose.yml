@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  influxdb:
+    image: influxdb:latest
+    ports:
+      - 8086:8086
+    environment:
+      - INFLUXDB_DB=db0
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=adminpassword1234
+      - DOCKER_INFLUXDB_INIT_ORG=UMATFG
+      - DOCKER_INFLUXDB_INIT_BUCKET=BucketTFG
+      - DOCKER_INFLUXDB_INIT_RETENTION=1w
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=ADMIN_TOKEN
+    volumes:
+      - influxdb-storage:/var/lib/influxdb
+    healthcheck:
+        test: "curl -f http://localhost:8086/ping"
+        interval: 10s
+        timeout: 5s
+        retries: 5
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana-storage:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning
+    depends_on:
+      influxdb:
+        condition: service_healthy
+
+  python:
+    build:
+      context: ./python
+      dockerfile: ./Dockerfile
+    volumes:
+      - ./python:/app
+    depends_on:
+      influxdb:
+        condition: service_healthy
+    environment:
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=ADMIN_TOKEN
+      - DOCKER_INFLUXDB_INIT_ORG=UMATFG
+      - DOCKER_INFLUXDB_INIT_BUCKET=BucketTFG
+        
+volumes:
+  influxdb-storage:
+  grafana-storage:
+
+
+

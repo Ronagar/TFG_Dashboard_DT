@@ -1,0 +1,25 @@
+apiVersion: 1
+
+datasources:
+  - name: InfluxDB
+    type: influxdb
+    access: proxy
+    database: db0
+    user: admin
+    password: admin
+    basicAuth: true
+    basicAuthUser: admin
+    url: http://influxdb:8086
+    isDefault: true
+    editable: true
+    uid: adi7yqk7zvvggd
+    jsonData:
+      version: Flux
+      organization: UMATFG
+      defaultBucket: BucketTFG
+      #tlsSkipVerify: true
+    secureJsonData:
+      token: ADMIN_TOKEN
+      password: adminpassword1234
+      basicAuthPassword: adminpassword1234
+     
