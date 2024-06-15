@@ -1,10 +1,12 @@
+import os
 import random
 import time
 import string
-from dataclasses import dataclass
+
 import influxdb_client
 from influxdb_client.client.write_api import SYNCHRONOUS
 from collections import deque
+from dataclasses import dataclass
 
 """
     Clase para crear los datos de los cargadores a enviar a InfluxDB.
@@ -80,10 +82,10 @@ class Car:
             self.energyBill = None
 
 # Configuración de InfluxDB
-myToken = "myToken"
-org = "myOrg"
-url = "http://localhost:8086"
-bucket = "myBucket"
+myToken = os.environ['DOCKER_INFLUXDB_INIT_ADMIN_TOKEN']
+org = os.environ['DOCKER_INFLUXDB_INIT_ORG']
+url = "http://influxdb:8086"
+bucket = os.environ['DOCKER_INFLUXDB_INIT_BUCKET']
 
 # Conexión a InfluxDB
 client = influxdb_client.InfluxDBClient(url=url, token=myToken, org=org)

@@ -1,0 +1,821 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 1,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "adi7yqk7zvvggd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 7,
+        "x": 0,
+        "y": 0
+      },
+      "id": 12,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "/.*/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {},
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "adi7yqk7zvvggd"
+          },
+          "query": "from(bucket: \"BucketTFG\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"stationA\")\n  |> filter(fn: (r) => contains( value: r[\"name\"], set: ${Chargers:json}))\n  |> filter(fn: (r) => r[\"_field\"] == \"vehicleID\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: true)\n  |> yield(name: \"last\")",
+          "refId": "A"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "vehicleID Charger1",
+                "vehicleID Charger2"
+              ]
+            }
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "adi7yqk7zvvggd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "purple",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "currencyEUR"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 7,
+        "y": 0
+      },
+      "id": 14,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "adi7yqk7zvvggd"
+          },
+          "query": "from(bucket: \"BucketTFG\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"stationA\")\n  |> filter(fn: (r) => contains( value: r[\"name\"], set: ${Chargers:json}))\n  |> filter(fn: (r) => r[\"_field\"] == \"energyBill\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: true)\n  |> yield(name: \"last\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Current Vehicle Bill",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "adi7yqk7zvvggd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "yellow",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "kwatth"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 13,
+        "y": 0
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "adi7yqk7zvvggd"
+          },
+          "query": "from(bucket: \"BucketTFG\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"stationA\")\n  //|> filter(fn: (r) => contains(value: r[\"name\"], set: ${Chargers:json}))\n  |> filter(fn: (r) => r[\"name\"] == \"Charger1\")\n  |> filter(fn: (r) => r[\"_field\"] == \"maxPower\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Chargers Power",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "adi7yqk7zvvggd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "green",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "currencyEUR"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 16,
+        "y": 0
+      },
+      "id": 5,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "adi7yqk7zvvggd"
+          },
+          "query": "from(bucket: \"BucketTFG\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"stationA\")\n  //|> filter(fn: (r) => contains(value: r[\"name\"], set: ${Chargers:json}))\n  |> filter(fn: (r) => r[\"name\"] == \"Charger1\")\n  |> filter(fn: (r) => r[\"_field\"] == \"price\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Electricity Price / kWh",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "adi7yqk7zvvggd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "#f53b49",
+            "mode": "fixed"
+          },
+          "decimals": 1,
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 19,
+        "y": 0
+      },
+      "id": 19,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "/.*/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "adi7yqk7zvvggd"
+          },
+          "query": "from(bucket: \"BucketTFG\")\n  |> range(start: -1d)  // Selecciona el último día\n  |> filter(fn: (r) => r._measurement == \"stationAQueue\")\n  |> filter(fn: (r) => r._field == \"waitingTime1\" or r._field == \"vehicle1\")\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> group(columns: [\"vehicle1\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> unique(column: \"vehicle1\")\n  |> group()\n  |> mean(column: \"waitingTime1\")\n  |> yield(name: \"mean_waiting_time_vehicle1\")\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Average Waiting Time Today",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "adi7yqk7zvvggd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 30
+              },
+              {
+                "color": "green",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 13,
+        "x": 0,
+        "y": 4
+      },
+      "id": 1,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "adi7yqk7zvvggd"
+          },
+          "query": "from(bucket: \"BucketTFG\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"stationA\")\n  |> filter(fn: (r) => contains( value: r[\"name\"], set: ${Chargers:json}))\n  |> filter(fn: (r) => r[\"_field\"] == \"bateryLevel\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: true)\n  |> yield(name: \"last\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Batery Level",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "adi7yqk7zvvggd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-GrYlRd"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 11,
+        "x": 13,
+        "y": 4
+      },
+      "id": 17,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "/.*/",
+          "limit": 5,
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "adi7yqk7zvvggd"
+          },
+          "query": "from(bucket: \"BucketTFG\")\n  |> range(start: -30s)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"stationAQueue\")\n  |> filter(fn: (r) => r[\"_field\"] == \"waitingTime1\" or r[\"_field\"] == \"waitingTime2\" or r[\"_field\"] == \"waitingTime3\" or r[\"_field\"] == \"waitingTime4\" or r[\"_field\"] == \"waitingTime5\" or r[\"_field\"] == \"vehicle5\" or r[\"_field\"] == \"vehicle4\" or r[\"_field\"] == \"vehicle3\" or r[\"_field\"] == \"vehicle2\" or r[\"_field\"] == \"vehicle1\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"last\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Waiting Queue",
+      "transformations": [
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "byVariable": false,
+            "include": {
+              "names": [
+                "vehicle1",
+                "vehicle2",
+                "vehicle3",
+                "vehicle4",
+                "vehicle5",
+                "waitingTime1",
+                "waitingTime2",
+                "waitingTime3",
+                "waitingTime4",
+                "waitingTime5"
+              ]
+            }
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "adi7yqk7zvvggd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "hidden",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "noValue": "No Historic Data",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 11,
+        "x": 13,
+        "y": 10
+      },
+      "id": 21,
+      "options": {
+        "barRadius": 0.1,
+        "barWidth": 0.98,
+        "fullHighlight": false,
+        "groupWidth": 0.9,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "horizontal",
+        "showValue": "always",
+        "stacking": "none",
+        "tooltip": {
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "adi7yqk7zvvggd"
+          },
+          "query": "// Función que calcula la media de waitingTime1 para un rango de tiempo dado\naverageWaitingTime = (start, stop, day) => \n  from(bucket: \"BucketTFG\")\n    |> range(start: start, stop: stop)\n    |> filter(fn: (r) => r._measurement == \"stationAQueue\")\n    |> filter(fn: (r) => r._field == \"waitingTime1\" or r._field == \"vehicle1\")\n    |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n    |> group(columns: [\"vehicle1\"])\n    |> sort(columns: [\"_time\"], desc: true)\n    |> unique(column: \"vehicle1\")\n    |> group()\n    |> mean(column: \"waitingTime1\")\n    |> map(fn: (r) => ({r with day: day, mean: r.waitingTime1, media: \"media\"}))\n    |> keep(columns: [\"day\", \"mean\", \"media\"])\n\navgDay1 = averageWaitingTime(start: -1d, stop: now(), day: \"Today\")\navgDay2 = averageWaitingTime(start: -2d, stop: -1d, day: \"Yesterday\")\navgDay3 = averageWaitingTime(start: -3d, stop: -2d, day: \"2DaysAgo\")\navgDay4 = averageWaitingTime(start: -4d, stop: -3d, day: \"3DaysAgo\")\navgDay5 = averageWaitingTime(start: -5d, stop: -4d, day: \"4DaysAgo\")\n\nunion(tables: [avgDay1, avgDay2, avgDay3, avgDay4, avgDay5])\n  |> group()\n  |> pivot(rowKey: [\"media\"], columnKey: [\"day\"], valueColumn: \"mean\")\n  |> yield(name: \"averageWaitingTime5Days\")\n\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Average waiting time last 5 days",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Today": false,
+              "media": false
+            },
+            "includeByName": {},
+            "indexByName": {
+              "2DaysAgo": 3,
+              "3DaysAgo": 4,
+              "Today": 1,
+              "Yesterday": 2,
+              "media": 0
+            },
+            "renameByName": {
+              "media": ""
+            }
+          }
+        }
+      ],
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "adi7yqk7zvvggd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "orange",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "kwatth"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 12
+      },
+      "id": 13,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "adi7yqk7zvvggd"
+          },
+          "query": "from(bucket: \"BucketTFG\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"stationA\")\n  |> filter(fn: (r) => contains( value: r[\"name\"], set: ${Chargers:json}))\n  |> filter(fn: (r) => r[\"_field\"] == \"energyConsumed\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: true)\n  |> yield(name: \"last\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Current Vehicle Consumption",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "adi7yqk7zvvggd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "orange",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "kwatth"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 7,
+        "x": 6,
+        "y": 12
+      },
+      "id": 20,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "adi7yqk7zvvggd"
+          },
+          "query": "from(bucket: \"BucketTFG\")\n  |> range(start: -1d)  // Ajusta el rango de tiempo según tus necesidades\n  |> filter(fn: (r) => r._measurement == \"stationA\")\n  |> filter(fn: (r) => r._field == \"energyConsumed\" or r._field == \"vehicleID\")\n  |> filter(fn: (r) => contains(value: r[\"name\"], set: ${Chargers:json}))\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> group(columns: [\"name\", \"vehicleID\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> unique(column: \"vehicleID\")\n  |> group(columns: [\"name\"])\n  |> sum(column: \"energyConsumed\")\n  |> yield(name: \"totalEnergyConsumedXcharger\")\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Energy Consumed Today",
+      "type": "stat"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "adi7yqk7zvvggd"
+        },
+        "definition": "import \"influxdata/influxdb/v1\"\nv1.tagValues(\n    bucket: v.bucket,\n    tag: \"name\",\n    predicate: (r) => true,\n    start: -10s\n)",
+        "description": "Variable to filter by the available chargers (tags) in the station.",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Charger",
+        "multi": true,
+        "name": "Chargers",
+        "options": [],
+        "query": "import \"influxdata/influxdb/v1\"\nv1.tagValues(\n    bucket: v.bucket,\n    tag: \"name\",\n    predicate: (r) => true,\n    start: -10s\n)",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timeRangeUpdatedDuringEditOrView": false,
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "EV Charging Monitoring",
+  "uid": "ddi7zrgho4hz4e",
+  "version": 38,
+  "weekStart": ""
+}
